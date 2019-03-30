@@ -1,0 +1,28 @@
+version: '3'
+services:
+  springboot:
+    build:
+      context: .
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/db_colaborador
+    image: jean/colaborador-api
+    container_name: colaborador-api
+    ports:
+      - 8080:8080
+    depends_on:
+      - mongo
+    links:
+      - mongo
+    networks:
+      - spring-mongo-net
+  mongo:
+    image: mongo
+    container_name: mongodb
+    ports:
+      - 27018:27017
+    command: mongod --smallfiles --logpath=/dev/null # --quiet
+    networks:
+      - spring-mongo-net
+networks:
+  spring-mongo-net:
+    driver: bridge
