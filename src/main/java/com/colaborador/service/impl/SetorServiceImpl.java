@@ -22,4 +22,9 @@ public class SetorServiceImpl implements SetorService {
     public void save(List<Setor> setorList) {
         this.setorRepository.saveAll(setorList);
     }
+
+    @Override
+    public List<Setor> lista() {
+        return this.setorRepository.findAll();
+    }
 }

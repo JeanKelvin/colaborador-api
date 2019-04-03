@@ -1,12 +1,12 @@
 package com.colaborador.ws;
 
 import com.colaborador.model.Colaborador;
+import com.colaborador.model.dto.ColaboradorDTO;
 import com.colaborador.service.ColaboradorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,39 +24,38 @@ public class ColaboradorRest {
     }
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping(consumes = APPLICATION_JSON_VALUE)
-    public Colaborador insere(@RequestBody Colaborador colaborador) {
-         return this.colaboradorService.insere(colaborador);
+    @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    public Colaborador insere(@RequestBody ColaboradorDTO colaboradorDTO) {
+         return this.colaboradorService.insere(colaboradorDTO);
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @PutMapping(consumes = "application/json")
-    public void atualiza(@RequestBody Colaborador colaborador) {
-        this.colaboradorService.atualiza(colaborador);
+    @PutMapping(consumes = APPLICATION_JSON_VALUE)
+    public void atualiza(@RequestBody ColaboradorDTO colaboradorDTO) {
+        this.colaboradorService.atualiza(colaboradorDTO);
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(produces = "application/json")
+    @GetMapping(produces = APPLICATION_JSON_VALUE)
     public List<Colaborador> lista() {
         return this.colaboradorService.lista();
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "{id}", produces = APPLICATION_JSON_VALUE)
-    public List<Colaborador> busca(@PathVariable("id") String id) {
-        Optional<Colaborador> busca = this.colaboradorService.busca(id);
-        return Collections.singletonList(busca.get());
-    }
-
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping(value = "/setor", produces = "application/json")
-    public List<Colaborador> listaBySetor() {
-        return this.colaboradorService.lista();
+    public Optional<Colaborador> busca(@PathVariable("id") String id) {
+        return this.colaboradorService.busca(id);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping(value = "{id}")
     public void remove(@PathVariable("id") String id) {
         this.colaboradorService.remove(id);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(value = "/setor", produces = APPLICATION_JSON_VALUE)
+    public List<Colaborador> listaBySetor() {
+        return this.colaboradorService.lista();
     }
 }

@@ -1,23 +1,15 @@
-package com.colaborador.model;
-
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
+package com.colaborador.model.dto;
 
 import java.time.LocalDateTime;
 
-@Document(collection = "colaborador")
-public class Colaborador {
+public class ColaboradorDTO {
 
-    @Id
     private String id;
     private String nome;
     private String cpf;
     private String email;
     private LocalDateTime dataNascimento;
-
-    @DBRef
-    private Setor setor;
+    private String setorId;
 
     public String getId() {
         return id;
@@ -59,11 +51,11 @@ public class Colaborador {
         this.dataNascimento = dataNascimento;
     }
 
-    public Setor getSetor() {
-        return setor;
+    public String getSetorId() {
+        return setorId;
     }
 
-    public void setSetor(Setor setor) {
-        this.setor = setor;
+    public void setSetorId(String setorId) {
+        this.setorId = setorId;
     }
 }

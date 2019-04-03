@@ -4,6 +4,7 @@ import com.colaborador.model.Colaborador;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ColaboradorRepository extends MongoRepository<Colaborador, String> {
@@ -12,10 +13,10 @@ public interface ColaboradorRepository extends MongoRepository<Colaborador, Stri
 
     Long countColaboradorBy();
 
-    Long countColaboradorByDataNascimentoBefore(LocalDate dataNascimento);
+    Long countColaboradorByDataNascimentoBefore(LocalDateTime dataNascimento);
 
-    List<Colaborador> findAllByDataNascimentoAfter(LocalDate dataNascimento);
+    List<Colaborador> findAllByDataNascimentoAfter(LocalDateTime dataNascimento);
 
-    Long countAllByDataNascimentoAfterAndSetor(LocalDate dataNascimento, String id);
+    Long countAllByDataNascimentoAfterAndSetor(LocalDateTime dataNascimento, String id);
 
 }

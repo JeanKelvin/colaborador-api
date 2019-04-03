@@ -4,13 +4,15 @@ import com.colaborador.exception.ColaboradorException;
 import com.colaborador.model.Colaborador;
 import com.colaborador.model.Setor;
 import com.colaborador.model.dto.AgruparColaborador;
+import com.colaborador.model.dto.ColaboradorDTO;
 import com.colaborador.repository.ColaboradorRepository;
 import com.colaborador.repository.SetorRepository;
 import com.colaborador.service.ColaboradorService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -29,29 +31,47 @@ public class ColaboradorServiceImpl implements ColaboradorService {
     }
 
     @Override
-    public Colaborador insere(Colaborador colaborador) {
-        verificaColaboradoresMaiores65anos();
+    public Colaborador insere(ColaboradorDTO colaboradorDTO) {
+        //TODO create a validator service
 
-        verificaColaboradoresMenores18anos();
+        Optional<Setor> setor = this.setorRepository.findById(colaboradorDTO.getSetorId());
+
+        if (!setor.isPresent()) {
+            throw new ColaboradorException("Setor não encontrado.");
+        }
+
+        Colaborador colaborador = new Colaborador();
+        colaborador.setSetor(setor.get());
+
+        BeanUtils.copyProperties(colaboradorDTO, colaborador);
+
+        verificaColaboradoresMaiores65anos(colaborador);
+
+        verificaColaboradoresMenores18anos(colaborador);
 
         return this.colaboradorRepository.save(colaborador);
     }
 
     @Override
-    public void atualiza(Colaborador colaborador) {
+    public void atualiza(ColaboradorDTO colaboradorDTO) {
 
-        Optional<Colaborador> busca = this.busca(colaborador.getId());
+        Optional<Colaborador> busca = this.busca(colaboradorDTO.getId());
         if (!busca.isPresent()) {
             throw new ColaboradorException("Colaborador não encontrado.");
         }
 
-        this.insere(colaborador);
+        this.insere(colaboradorDTO);
     }
 
-    private void verificaColaboradoresMaiores65anos() {
+    private void verificaColaboradoresMaiores65anos(Colaborador colaborador) {
         Long totalColaborador = this.colaboradorRepository.countColaboradorBy();
 
-        Long maioresDe65Anos = this.colaboradorRepository.countColaboradorByDataNascimentoBefore(LocalDate.now().minusYears(65));
+        LocalDateTime minus65years = LocalDateTime.now().minusYears(65);
+        Long maioresDe65Anos = this.colaboradorRepository.countColaboradorByDataNascimentoBefore(minus65years);
+
+        if (colaborador.getDataNascimento().isBefore(minus65years)) {
+            maioresDe65Anos += 1;
+        }
 
         if (maioresDe65Anos > 0) {
             Long porcentagem = calculaPorcentagem(maioresDe65Anos, totalColaborador);
@@ -62,21 +82,28 @@ public class ColaboradorServiceImpl implements ColaboradorService {
         }
     }
 
-    private void verificaColaboradoresMenores18anos() {
-        List<Colaborador> menoresDe18Anos = this.colaboradorRepository.findAllByDataNascimentoAfter(LocalDate.now().minusYears(18));
+    private void verificaColaboradoresMenores18anos(Colaborador colaborador) {
+        LocalDateTime minus18Years = LocalDateTime.now().minusYears(18);
+
+        List<Colaborador> menoresDe18Anos = this.colaboradorRepository.findAllByDataNascimentoAfter(minus18Years);
 
         if (!menoresDe18Anos.isEmpty()) {
 
-            menoresDe18Anos.forEach(colaborador -> {
+            menoresDe18Anos.forEach(c -> {
 
-                Long totalColaboradorPorSetor = this.setorRepository.countAllById(colaborador.getSetor().getId());
+                Long totalColaboradorPorSetor = this.setorRepository.countAllById(c.getSetor().getId());
 
-                Long totalMenoresDe18AnosPorSetor = this.colaboradorRepository.countAllByDataNascimentoAfterAndSetor(LocalDate.now().minusYears(18), colaborador.getSetor().getId());
+                Long totalMenoresDe18AnosPorSetor = this.colaboradorRepository.countAllByDataNascimentoAfterAndSetor(minus18Years, c.getSetor().getId());
+
+                if (colaborador.getDataNascimento().isAfter(minus18Years)
+                        && colaborador.getSetor().getId().equals(c.getSetor().getId())) {
+                    totalMenoresDe18AnosPorSetor += 1L;
+                }
 
                 Long porcentagem = calculaPorcentagem(totalMenoresDe18AnosPorSetor, totalColaboradorPorSetor);
 
                 if (porcentagem > 20L) {
-                    throw new ColaboradorException("Limite de menores de 18 anos atingido no setor: " + colaborador.getSetor().getDescricao());
+                    throw new ColaboradorException("Limite de menores de 18 anos atingido no setor: " + c.getSetor().getDescricao());
                 }
             });
         }

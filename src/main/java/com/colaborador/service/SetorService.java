@@ -7,4 +7,6 @@ import java.util.List;
 public interface SetorService {
 
     void save(List<Setor> setorList);
+
+    List<Setor> lista();
 }

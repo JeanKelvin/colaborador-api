@@ -7,9 +7,9 @@ import com.colaborador.model.Setor;
 
 public class SetorTemplate implements TemplateLoader {
 
-    static final String SETOR_TI = "setorTI";
-    static final String SETOR_CONTABILIDADE = "setorContabilidade";
-    static final String SETOR_FISCAL = "setorFiscal";
+    public static final String SETOR_TI = "setorTI";
+    public static final String SETOR_CONTABILIDADE = "setorContabilidade";
+    public static final String SETOR_FISCAL = "setorFiscal";
 
 
 
